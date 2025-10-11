@@ -9,35 +9,20 @@
       "distribution": "internal",
       "node": "20.19.4",
       "env": {
-        "API_KEY": "AIzaSyDeCrKjfLLrM44O0j28YjQPMdPNPFXCEuw",
-        "AUTH_DOMAIN": "la-despensa-46f5f.firebaseapp.com",
-        "PROJECT_ID": "la-despensa-46f5f",
-        "STORAGE_BUCKET": "la-despensa-46f5f.firebasestorage.app",
-        "MESSAGING_SENDER_ID": "401040527287",
-        "APP_ID": "1:401040527287:web:086672f91a15dc281da232"
+      
       }
     },
     "preview": {
       "distribution": "internal",
       "env": {
-        "API_KEY": "AIzaSyDeCrKjfLLrM44O0j28YjQPMdPNPFXCEuw",
-        "AUTH_DOMAIN": "la-despensa-46f5f.firebaseapp.com",
-        "PROJECT_ID": "la-despensa-46f5f",
-        "STORAGE_BUCKET": "la-despensa-46f5f.firebasestorage.app",
-        "MESSAGING_SENDER_ID": "401040527287",
-        "APP_ID": "1:401040527287:web:086672f91a15dc281da232"
+       
       }
     },
     "production": {
       "autoIncrement": true,
       "node": "20.19.4",
       "env": {
-        "API_KEY": "AIzaSyDeCrKjfLLrM44O0j28YjQPMdPNPFXCEuw",
-        "AUTH_DOMAIN": "la-despensa-46f5f.firebaseapp.com",
-        "PROJECT_ID": "la-despensa-46f5f",
-        "STORAGE_BUCKET": "la-despensa-46f5f.firebasestorage.app",
-        "MESSAGING_SENDER_ID": "401040527287",
-        "APP_ID": "1:401040527287:web:086672f91a15dc281da232"
+       
       }
     }
   },
