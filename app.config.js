@@ -18,11 +18,13 @@ export default {
     },
     "android": {
       "permissions": ["RECORD_AUDIO"],
+      "package": "com.santyuv.ladespensa",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "edgeToEdgeEnabled": true
+      "edgeToEdgeEnabled": true,
+      "kotlinVersion": "2.0.21"
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -30,13 +32,18 @@ export default {
     "plugins": [
       "expo-speech-recognition"
     ],
+
+    
     extra: {
       apiKey: process.env.API_KEY,
       authDomain: process.env.AUTH_DOMAIN,
       projectId: process.env.PROJECT_ID,
       storageBucket: process.env.STORAGE_BUCKET,
       messagingSenderId: process.env.MESSAGING_SENDER_ID,
-      appId: process.env.APP_ID
+      appId: process.env.APP_ID,
+      eas: {
+        projectId: "b7149c91-3382-4d30-b4e5-cc4427755485"
+      }
     }
   }
 }
