@@ -8,6 +8,8 @@ node_modules/
 dist/
 web-build/
 expo-env.d.ts
+eas.json
+
 
 # Native
 .kotlin/
@@ -36,4 +38,3 @@ yarn-error.*
 
 # typescript
 *.tsbuildinfo
-eas.json

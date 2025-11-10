@@ -1,124 +1,18 @@
 import * as React from "react";
 import * as RN from "react-native";
 
-import { ExpoSpeechRecognitionModule, useSpeechRecognitionEvent } from 'expo-speech-recognition';
-import { PermissionsAndroid, Platform } from 'react-native';
-import { useEffect, useRef } from 'react';
 import { useNavigation } from "@react-navigation/native";
 import { database } from "../config/fb";
 import { collection, onSnapshot, orderBy, query } from "firebase/firestore";
 import Products from "../components/Products";
+import { MaterialIcons } from '@expo/vector-icons';
 import { 
     requestNotificationPermissions, } from "../services/notification";
 
 export default function Home() {
     const [products, setProducts] = React.useState([]);
+    const [activeNav, setActiveNav] = React.useState('Cocina');
     const navigation = useNavigation();
-    // Estado del asistente de voz
-    const [transcript, setTranscript] = React.useState('');
-    const [listening, setListening] = React.useState(false);
-    const [error, setError] = React.useState(null);
-
-    // Obtener resultados de reconocimiento
-    useSpeechRecognitionEvent('onRecognitionResult', (event) => {
-        if (event && event.value) {
-            setTranscript(event.value.transcript || '');
-        }
-    });
-    useSpeechRecognitionEvent('onRecognitionError', (event) => {
-        setError(event);
-        setListening(false);
-    });
-    useSpeechRecognitionEvent('onRecognitionStart', () => {
-        setListening(true);
-        setError(null);
-    });
-    useSpeechRecognitionEvent('onRecognitionEnd', () => {
-        setListening(false);
-    });
-
-    const requestMicrophonePermission = async () => {
-        if (Platform.OS === 'android') {
-            const granted = await PermissionsAndroid.request(
-                PermissionsAndroid.PERMISSIONS.RECORD_AUDIO,
-                {
-                    title: 'Permiso de micrófono',
-                    message: 'La aplicación necesita acceso al micrófono para reconocer tu voz.',
-                    buttonNeutral: 'Preguntar luego',
-                    buttonNegative: 'Cancelar',
-                    buttonPositive: 'Aceptar',
-                }
-            );
-            return granted === PermissionsAndroid.RESULTS.GRANTED;
-        }
-        return true;
-    };
-
-    // Por ahora solo funciona en web
-    const recognitionRef = useRef(null);
-    const isWeb = Platform.OS === 'web';
-
-    const startListening = async () => {
-        setTranscript('');
-        setError(null);
-        if (isWeb) {
-            if (!('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) {
-                setError({ message: 'Tu navegador no soporta reconocimiento de voz.' });
-                return;
-            }
-            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-            const recognition = new SpeechRecognition();
-            recognition.lang = 'es-ES';
-            recognition.continuous = true;
-            recognition.interimResults = true;
-            recognition.onresult = (event) => {
-                let text = '';
-                for (let i = event.resultIndex; i < event.results.length; ++i) {
-                    text += event.results[i][0].transcript;
-                }
-                setTranscript(text);
-            };
-            recognition.onerror = (event) => {
-                setError({ message: event.error });
-            };
-            recognition.onstart = () => {
-                setListening(true);
-            };
-            recognition.onend = () => {
-                setListening(false);
-            };
-            recognitionRef.current = recognition;
-            recognition.start();
-        } else {
-            const hasPermission = await requestMicrophonePermission();
-            if (!hasPermission) {
-                setError({ message: 'Permiso de micrófono denegado.' });
-                return;
-            }
-            try {
-                await ExpoSpeechRecognitionModule.start({
-                    language: 'es-ES',
-                    continuous: true,
-                });
-            } catch (e) {
-                setError(e);
-            }
-        }
-    };
-
-    const stopListening = async () => {
-        if (isWeb && recognitionRef.current) {
-            recognitionRef.current.stop();
-            recognitionRef.current = null;
-            setListening(false);
-        } else {
-            try {
-                await ExpoSpeechRecognitionModule.stop();
-            } catch (e) {
-                setError(e);
-            }
-        }
-    };
 
     // Solicitar permisos al cargar la app
     React.useEffect(() => {
@@ -126,22 +20,8 @@ export default function Home() {
     }, []);
 
     React.useLayoutEffect(() => {
-        navigation.setOptions({
-            headerRight: () => (
-                <RN.TouchableOpacity
-                    style={{
-                        marginRight: 10,
-                        backgroundColor: '#FF6347',
-                        borderRadius: 6,
-                        paddingVertical: 6,
-                        paddingHorizontal: 16,
-                    }}
-                    onPress={() => navigation.navigate("Add")}
-                >
-                    <RN.Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 16 }}>Add</RN.Text>
-                </RN.TouchableOpacity>
-            )
-        });
+        // Hide the native header so our custom hero header is the top bar
+        navigation.setOptions({ headerShown: false });
     }, [navigation]);
 
     React.useEffect(() => {
@@ -159,54 +39,41 @@ export default function Home() {
             
             setProducts(productsData);
             
+        }, (error) => {
+            console.error('[fb] onSnapshot error', error && error.code, error && error.message);
         });
         
         return unsubscribe;
     }, []);
 
     return (
-        <RN.ScrollView style={{ flex: 1, backgroundColor: '#f5f5f5' }}>
-            <RN.Text style={styles.header}>Inventario</RN.Text>
-            {/* Voice Assistant UI */}
-            <RN.View style={{ alignItems: 'center', marginBottom: 16 }}>
-                <RN.TouchableOpacity
-                    onPress={listening ? stopListening : startListening}
-                    style={{
-                        backgroundColor: listening ? '#FF6347' : '#eee',
-                        borderRadius: 32,
-                        padding: 16,
-                        marginBottom: 8,
-                        borderWidth: 2,
-                        borderColor: '#FF6347',
-                    }}
-                >
-                    <RN.Text style={{ fontSize: 32 }}>
-                        🎤
-                    </RN.Text>
-                </RN.TouchableOpacity>
-                <RN.Text style={{ color: '#333', fontSize: 16, minHeight: 24 }}>
-                    {listening ? 'Escuchando...' : 'Toca el micrófono para hablar'}
-                </RN.Text>
-                <RN.View style={{
-                    backgroundColor: '#fff7f3',
-                    borderRadius: 8,
-                    padding: 12,
-                    marginTop: 8,
-                    minHeight: 48,
-                    width: '90%',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    borderWidth: 1,
-                    borderColor: '#FF6347',
-                }}>
-                    <RN.Text style={{ color: '#FF6347', fontSize: 20, textAlign: 'center' }}>
-                        {transcript || 'Aquí aparecerá el texto reconocido...'}
-                    </RN.Text>
+        <RN.View style={{ flex: 1, backgroundColor: '#f5f5dce2' }}>
+            {/* Header */}
+            <RN.View style={styles.hero}>
+                <RN.View style={styles.heroTopRow}>
+                    <RN.View style={styles.leftPlaceholder} />
+                    <RN.Text style={styles.logo}>Mi Despensa</RN.Text>
+                    <RN.TouchableOpacity style={styles.iconButton} onPress={() => { /* search placeholder */ }}>
+                        <MaterialIcons name="search" size={26} color="#fff" />
+                    </RN.TouchableOpacity>
                 </RN.View>
-                {error ? (
-                    <RN.Text style={{ color: 'red', fontSize: 14 }}>{error.message || error.toString()}</RN.Text>
-                ) : null}
+
+                <RN.View style={styles.headerNav}>
+                    <RN.TouchableOpacity
+                        style={[styles.navPill, activeNav === 'Cocina' && styles.navPillActive]}
+                        onPress={() => setActiveNav('Cocina')}
+                    >
+                        <RN.Text style={[styles.navPillText, activeNav === 'Cocina' && styles.navPillTextActive]}>Cocina</RN.Text>
+                    </RN.TouchableOpacity>
+                    <RN.TouchableOpacity style={styles.navPill} onPress={() => {}}>
+                        <RN.Text style={styles.navPillText}>Recetas</RN.Text>
+                    </RN.TouchableOpacity>
+                </RN.View>
             </RN.View>
+
+            <RN.ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: 120 }}>
+                <RN.Text style={styles.sectionTitle}>Inventario</RN.Text>
+     
             {products.length === 0 ? (
                 <RN.View style={{ padding: 32, alignItems: 'center' }}>
                     <RN.Text style={{ fontSize: 18, color: '#888', textAlign: 'center' }}>
@@ -216,11 +83,102 @@ export default function Home() {
             ) : (
                 products.map(product => <Products key={product.id} {...product} />)
             )}
-        </RN.ScrollView>
+            </RN.ScrollView>
+
+            {/* Boton Add flotante */}
+            <RN.TouchableOpacity
+                onPress={() => navigation.navigate('Add')}
+                style={styles.fab}
+            >
+                <RN.Text style={{ color: '#fff', fontSize: 28 }}>＋</RN.Text>
+            </RN.TouchableOpacity>
+        </RN.View>
     );
 }
 
 const styles = RN.StyleSheet.create({
+    hero: {
+        backgroundColor: '#365c36ff',
+        paddingTop: 18,
+        paddingHorizontal: 20,
+        paddingBottom: 12,
+        borderBottomLeftRadius: 20,
+        borderBottomRightRadius: 20,
+        alignContent: 'center',
+    },
+    heroTopRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+    },
+    logo: {
+        color: '#fff',
+        fontSize: 30,
+        fontWeight: '800',
+        textAlign: 'center',
+        marginTop: 35,
+        paddingLeft: 28.,
+    },
+    iconButton: {
+        marginLeft: 8,
+        padding: 1,
+        marginTop: 40,
+    },
+    iconText: {
+        fontSize: 20,
+        color: '#fff'
+    },
+
+    headerNav: {
+        flexDirection: 'row',
+        justifyContent: 'center',
+        marginTop: 30,
+    },
+    navPill: {
+        backgroundColor: 'rgba(255,255,255,0.16)',
+        paddingVertical: 12,
+        paddingHorizontal: 20,
+        borderRadius: 22,
+        marginHorizontal: 10,
+    },
+    navPillText: {
+        color: '#fff',
+        fontWeight: '700',
+        fontSize: 16,
+    },
+    navPillActive: {
+        backgroundColor: '#fff',
+        borderColor: 'transparent',
+    },
+    navPillTextActive: {
+        color: '#2E8B57',
+    },
+
+    sectionTitle: {
+        fontSize: 24,
+        fontWeight: '700',
+        color: '#333',
+        marginTop: 18,
+        marginHorizontal: 20,
+        marginBottom: 6,
+        textAlign: 'center',
+    },
+    fab: {
+        position: 'absolute',
+        right: 20,
+        bottom: 30,
+        width: 64,
+        height: 64,
+        borderRadius: 32,
+        backgroundColor: '#90EE90',
+        justifyContent: 'center',
+        alignItems: 'center',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 6 },
+        shadowOpacity: 0.2,
+        shadowRadius: 8,
+        elevation: 8,
+    },
     header: {
         fontSize: 36,
         fontWeight: 'bold',

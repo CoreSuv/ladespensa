@@ -17,7 +17,7 @@ export default {
       "supportsTablet": true
     },
     "android": {
-      "permissions": ["RECORD_AUDIO"],
+      "permissions": ["RECORD_AUDIO", "INTERNET", "ACCESS_NETWORK_STATE"],
       "package": "com.santyuv.ladespensa",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
