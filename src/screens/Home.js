@@ -20,7 +20,7 @@ export default function Home() {
     }, []);
 
     React.useLayoutEffect(() => {
-        // Hide the native header so our custom hero header is the top bar
+
         navigation.setOptions({ headerShown: false });
     }, [navigation]);
 
@@ -53,7 +53,7 @@ export default function Home() {
                 <RN.View style={styles.heroTopRow}>
                     <RN.View style={styles.leftPlaceholder} />
                     <RN.Text style={styles.logo}>Mi Despensa</RN.Text>
-                    <RN.TouchableOpacity style={styles.iconButton} onPress={() => { /* search placeholder */ }}>
+                    <RN.TouchableOpacity style={styles.iconButton} onPress={() => {}}>
                         <MaterialIcons name="search" size={26} color="#fff" />
                     </RN.TouchableOpacity>
                 </RN.View>
@@ -65,9 +65,15 @@ export default function Home() {
                     >
                         <RN.Text style={[styles.navPillText, activeNav === 'Cocina' && styles.navPillTextActive]}>Cocina</RN.Text>
                     </RN.TouchableOpacity>
-                    <RN.TouchableOpacity style={styles.navPill} onPress={() => {}}>
-                        <RN.Text style={styles.navPillText}>Recetas</RN.Text>
-                    </RN.TouchableOpacity>
+                        <RN.TouchableOpacity
+                            style={[styles.navPill, activeNav === 'Recetas' && styles.navPillActive]}
+                            onPress={() => {
+                                setActiveNav('Recetas');
+                                navigation.navigate('Recetas');
+                            }}
+                        >
+                            <RN.Text style={[styles.navPillText, activeNav === 'Recetas' && styles.navPillTextActive]}>Recetas</RN.Text>
+                        </RN.TouchableOpacity>
                 </RN.View>
             </RN.View>
 

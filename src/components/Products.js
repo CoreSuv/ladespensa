@@ -10,7 +10,6 @@ import { MaterialIcons } from '@expo/vector-icons';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import ImageService from '../services/ImageService';
 
-// ← CAMBIAR LA FIRMA DE LA FUNCIÓN, agregar imageUrl
 export default function Products({ id, name, category, quantity, expire_date, imageUrl }) {
 
     const [deleteModalVisible, setDeleteModalVisible] = React.useState(false);
@@ -288,21 +287,37 @@ export default function Products({ id, name, category, quantity, expire_date, im
                         </RN.TouchableOpacity>
 
                         {showEditDatePicker && (
-                            <DateTimePicker
-                                value={editData.expire_date ? new Date(editData.expire_date) : new Date()}
-                                mode="date"
-                                display="default"
-                                minimumDate={new Date()}
-                                onChange={(event, selectedDate) => {
-                                    setShowEditDatePicker(false);
-                                    if (selectedDate) {
-                                        const yyyy = selectedDate.getFullYear();
-                                        const mm = String(selectedDate.getMonth() + 1).padStart(2, '0');
-                                        const dd = String(selectedDate.getDate()).padStart(2, '0');
-                                        setEditData({ ...editData, expire_date: `${yyyy}-${mm}-${dd}` });
-                                    }
-                                }}
-                            />
+                            RN.Platform.OS === 'web' ? (
+                                <div style={{ width: '100%' }}>
+                                    <input
+                                        type="date"
+                                        value={editData.expire_date || ''}
+                                        min={new Date().toISOString().split('T')[0]}
+                                        onChange={(e) => {
+                                            setShowEditDatePicker(false);
+                                            const val = e.target.value; // yyyy-mm-dd
+                                            if (val) setEditData({ ...editData, expire_date: val });
+                                        }}
+                                        style={{ width: '100%', padding: 10, fontSize: 16, borderRadius: 6, border: '1px solid #ddd' }}
+                                    />
+                                </div>
+                            ) : (
+                                <DateTimePicker
+                                    value={editData.expire_date ? new Date(editData.expire_date) : new Date()}
+                                    mode="date"
+                                    display="default"
+                                    minimumDate={new Date()}
+                                    onChange={(event, selectedDate) => {
+                                        setShowEditDatePicker(false);
+                                        if (selectedDate) {
+                                            const yyyy = selectedDate.getFullYear();
+                                            const mm = String(selectedDate.getMonth() + 1).padStart(2, '0');
+                                            const dd = String(selectedDate.getDate()).padStart(2, '0');
+                                            setEditData({ ...editData, expire_date: `${yyyy}-${mm}-${dd}` });
+                                        }
+                                    }}
+                                />
+                            )
                         )}
 
                         <RN.View style={{ flexDirection: 'row', justifyContent: 'flex-end', marginTop: 16 }}>

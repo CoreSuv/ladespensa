@@ -1,6 +1,8 @@
 import * as Notifications from 'expo-notifications';
 import { Platform } from 'react-native';
 
+const isWeb = Platform.OS === 'web';
+
 // Configurar cómo se manejan las notificaciones cuando la app está en primer plano
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
@@ -39,8 +41,13 @@ export async function requestNotificationPermissions() {
 
 // Cancelar todas las notificaciones de un producto
 export async function cancelProductNotifications(productId) {
+  if (isWeb) {
+    // Notifications API is not available on web in the same way — nothing to cancel
+    console.warn('[notifications] cancelProductNotifications(): not supported on web');
+    return;
+  }
+
   const allNotifications = await Notifications.getAllScheduledNotificationsAsync();
-  
   for (const notification of allNotifications) {
     if (notification.content.data?.productId === productId) {
       await Notifications.cancelScheduledNotificationAsync(notification.identifier);
@@ -50,8 +57,13 @@ export async function cancelProductNotifications(productId) {
 
 // Programar notificaciones para un producto
 export async function scheduleProductNotifications(product) {
+  if (isWeb) {
+    console.warn('[notifications] scheduleProductNotifications(): not supported on web');
+    return;
+  }
+
   if (!product.expire_date || !product.id) return;
-  
+
   // Cancelar notificaciones anteriores de este producto
   await cancelProductNotifications(product.id);
   
@@ -169,6 +181,10 @@ export async function scheduleProductNotifications(product) {
 
 // Verificar y actualizar notificaciones para productos vencidos
 export async function checkExpiredProducts(products) {
+  if (isWeb) {
+    console.warn('[notifications] checkExpiredProducts(): not supported on web');
+    return;
+  }
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   

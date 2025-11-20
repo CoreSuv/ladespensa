@@ -28,9 +28,7 @@ validateConfig(firebaseConfig);
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 
-// For React Native / environments without reliable XHR streaming support
-// use long-polling and disable fetch streams. This avoids WebChannel timeouts
-// seen on some Android builds/networks. See Firestore JS SDK docs for details.
+
 export const database = initializeFirestore(app, {
   experimentalForceLongPolling: true,
   useFetchStreams: false,

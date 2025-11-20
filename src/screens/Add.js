@@ -354,21 +354,37 @@ export default function Home() {
             </RN.TouchableOpacity>
             
             {showDatePicker && (
-                <DateTimePicker
-                    value={newItem.expire_date ? new Date(newItem.expire_date) : new Date()}
-                    mode="date"
-                    display="default"
-                    minimumDate={new Date()}
-                    onChange={(event, selectedDate) => {
-                        setShowDatePicker(false);
-                        if (selectedDate) {
-                            const yyyy = selectedDate.getFullYear();
-                            const mm = String(selectedDate.getMonth() + 1).padStart(2, '0');
-                            const dd = String(selectedDate.getDate()).padStart(2, '0');
-                            setNewItem({ ...newItem, expire_date: `${yyyy}-${mm}-${dd}` });
-                        }
-                    }}
-                />
+                Platform.OS === 'web' ? (
+                    <div style={{ width: '100%' }}>
+                        <input
+                            type="date"
+                            value={newItem.expire_date || ''}
+                            min={new Date().toISOString().split('T')[0]}
+                            onChange={(e) => {
+                                setShowDatePicker(false);
+                                const val = e.target.value; // yyyy-mm-dd
+                                if (val) setNewItem({ ...newItem, expire_date: val });
+                            }}
+                            style={{ width: '100%', padding: 10, fontSize: 16, borderRadius: 6, border: '1px solid #ddd' }}
+                        />
+                    </div>
+                ) : (
+                    <DateTimePicker
+                        value={newItem.expire_date ? new Date(newItem.expire_date) : new Date()}
+                        mode="date"
+                        display="default"
+                        minimumDate={new Date()}
+                        onChange={(event, selectedDate) => {
+                            setShowDatePicker(false);
+                            if (selectedDate) {
+                                const yyyy = selectedDate.getFullYear();
+                                const mm = String(selectedDate.getMonth() + 1).padStart(2, '0');
+                                const dd = String(selectedDate.getDate()).padStart(2, '0');
+                                setNewItem({ ...newItem, expire_date: `${yyyy}-${mm}-${dd}` });
+                            }
+                        }}
+                    />
+                )
             )}
 
             <RN.TouchableOpacity

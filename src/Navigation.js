@@ -3,6 +3,7 @@ import { NavigationContainer } from "@react-navigation/native";
 
 import Home from "./screens/Home";
 import Add from "./screens/Add";
+import Recipes from "./screens/Recipes";
 
 const Stack = createNativeStackNavigator();
 
@@ -13,6 +14,10 @@ function MyStack() {
       <Stack.Screen 
         name="Add" 
         component={Add} 
+      />
+      <Stack.Screen
+        name="Recetas"
+        component={Recipes}
       />
     </Stack.Navigator>
   );
