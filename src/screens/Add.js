@@ -39,7 +39,7 @@ export default function Home() {
 
     
 
-    // Web SpeechRecognition helpers
+    // Funciones para reconocimiento de voz
     const categoryOptions = [
         'Frutas','Verduras','Lácteos','Carnes','Granos','Panadería','Bebidas','Condimentos','Congelados','Dulces','Enlatados','Otros'
     ];
@@ -48,7 +48,6 @@ export default function Home() {
 
     const matchCategory = (text) => {
         const n = normalize(text);
-        // exact match or contains
         for (const opt of categoryOptions) {
             if (normalize(opt) === n) return opt;
         }
@@ -94,7 +93,6 @@ export default function Home() {
                     if (matched) {
                         setNewItem(prev => ({ ...prev, category: matched }));
                     } else {
-                        // fallback: set raw text
                         setNewItem(prev => ({ ...prev, category: text }));
                     }
                     return;

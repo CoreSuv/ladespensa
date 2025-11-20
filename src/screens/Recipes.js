@@ -2,7 +2,6 @@ import * as React from 'react';
 import * as RN from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 
-// Simple Recipes screen using TheMealDB (free) as example API
 // TheMealDB docs: https://www.themealdb.com/api.php
 
 export default function Recipes() {
